@@ -57,22 +57,26 @@ class LiepinDetailSpider(scrapy.spiders.Spider):
         with open(file_name, 'wb') as f:
             f.write(response.body)
 
-
+        conf = configparser.ConfigParser()
         file_name_content = file_dir+"/"+id+"_content.txt"
         if os.path.exists(file_name_content):
             os.remove(file_name_content)
+        content_str=""
         with open(file_name_content, 'w') as f:
             for t in content:
                 t = t.strip()
                 t = t.replace("\n","").replace("\r","")
                 if t!='':
+                    content_str+=t;
                     f.write(t+"\n")
+        conf.add_section("data")
+        #conf.set("data","content",content_str)
 
         file_name_data = file_dir + "/" + id + "_data.ini"
         if os.path.exists(file_name_data):
             os.remove(file_name_data)
-        conf = configparser.ConfigParser()
-        conf.add_section("data");
+
+
         if len(title) > 0:
             conf.set("data", "title", title[0].strip().replace("\r","").replace("\n",""))
         else:
@@ -86,6 +90,7 @@ class LiepinDetailSpider(scrapy.spiders.Spider):
             conf.set("data", "salary", salary[0].strip().replace("\r","").replace("\n",""))
         else:
             print("salary empty id:" + id)
+
         with open(file_name_data, 'w') as f:
             conf.write(f)
 
