@@ -39,9 +39,17 @@ class LiepinDetailSpider(scrapy.spiders.Spider):
     def parse(self, response):
         content = response.xpath('//div[@class="content content-word"]/text()').extract()
 
-        #print(dp)
+        title = response.xpath('//div[@class="job-note"]/h5/text()').extract()
+        #if len(title)==0:
+        #    title = response.xpath('//div[@class="title-info"]//h1/text()').extract()
+
+
+        #company = response.xpath('//div[@class="title-info"]//h3/text()').extract()
+        company = response.xpath('//div[@class="job-note"]//a/text()').extract()
+        if len(company) == 0:
+            company = response.xpath('//div[@class="job-note"]//span/text()').extract()
+        salary = response.xpath('//div[@class="job-note"]//p/text()').extract()
         id = response.url.split("/")[-1].replace(".shtml","")
-        print(id)
         file_dir = self.data_dir+id
         file_name = file_dir+"/"+id+".html"
         if os.path.exists(file_name):
@@ -59,5 +67,26 @@ class LiepinDetailSpider(scrapy.spiders.Spider):
                 t = t.replace("\n","").replace("\r","")
                 if t!='':
                     f.write(t+"\n")
+
+        file_name_data = file_dir + "/" + id + "_data.ini"
+        if os.path.exists(file_name_data):
+            os.remove(file_name_data)
+        conf = configparser.ConfigParser()
+        conf.add_section("data");
+        if len(title) > 0:
+            conf.set("data", "title", title[0].strip().replace("\r","").replace("\n",""))
+        else:
+            print("title empty id:"+id)
+
+        if len(company) > 0:
+            conf.set("data", "company", company[0].strip().replace("\r","").replace("\n",""))
+        else:
+            print("company empty id:" + id)
+        if len(salary) > 0:
+            conf.set("data", "salary", salary[0].strip().replace("\r","").replace("\n",""))
+        else:
+            print("salary empty id:" + id)
+        with open(file_name_data, 'w') as f:
+            conf.write(f)
 
 
