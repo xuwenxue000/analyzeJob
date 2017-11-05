@@ -16,6 +16,8 @@ key_words = codecs.open(key_words,'r',encoding='utf8').readlines()
 key_words = [ w.strip() for w in key_words ]
 stop_flag = ['x', 'c', 'u','d', 'p', 't', 'uj', 'm', 'f', 'r']
 words_all=set()
+
+##复制文件
 def copyFiles(sourceDir,  targetDir):
     if sourceDir.find(".svn") > 0:
         return
@@ -29,14 +31,14 @@ def copyFiles(sourceDir,  targetDir):
                     open(targetFile, "wb").write(open(sourceFile, "rb").read())
         if os.path.isdir(sourceFile):
             copyFiles(sourceFile, targetFile)
-
+##分词
 def tokenization(filename):
     result = []
     with open(filename, 'r') as f:
         text = f.read()
         words = pseg.cut(text,)
     for word, flag in words:
-        if flag not in stop_flag and word not in stopwords:
+        if flag not in stop_flag and word not in stopwords and len(word)>1:
             result.append(word)
     return result
 
@@ -110,6 +112,8 @@ index = similarities.MatrixSimilarity(tfidf_vectors)
 def average(seq):
  return float(sum(seq)) / len(seq)
 
+
+
 for id in filenames.keys():
     file_path = filenames[id]
     query = tokenization(file_path)
@@ -117,7 +121,7 @@ for id in filenames.keys():
     sims = index[query_bow]
     ave_sims = average(sims)
     #0.12
-    if ave_sims>0.12 and id not in template_ids:
+    if ave_sims<0.13 and id in template_ids:
         print(id+":"+str(ave_sims))
 
 
